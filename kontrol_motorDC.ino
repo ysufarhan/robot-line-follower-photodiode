@@ -1,78 +1,84 @@
-// Pin kontrol motor
-#define ENA 5    // Enable motor kiri (PWM)
-#define IN1 6    // Arah motor kiri
-#define IN2 7
-#define ENB 9    // Enable motor kanan (PWM)
-#define IN3 10   // Arah motor kanan
-#define IN4 11
+// === Definisi Pin Motor ===
+#define pin_pwm_motor_L 6     // ENA (L298N kiri)
+#define pin_dir_motor_L 9     // IN1
+#define pin_pwm_motor_R 5     // ENB (L298N kanan)
+#define pin_dir_motor_R 10    // IN3
 
-int speedMotor = 180;  // kecepatan (0–255)
+// === Variabel arah motor ===
+boolean LEFT  = 0;
+boolean RIGHT = 0;
 
-void setup() {
-  pinMode(ENA, OUTPUT);
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-
-  Serial.begin(9600);
-  Serial.println("Kontrol Motor Sederhana Siap!");
+// Fungsi untuk atur polaritas motor (kalau arah salah, ubah di sini)
+void polaritasMotor(boolean left, boolean right)
+{
+  LEFT  = left;
+  RIGHT = right;
 }
 
-void loop() {
-  // Contoh urutan gerak otomatis
-  maju();
+// Fungsi utama untuk mengatur kecepatan & arah motor
+void setMotor(int PWM_L, int PWM_R)
+{
+  // Set polaritas default (ubah sesuai arah putar motor)
+  polaritasMotor(0, 1);
+
+  // --- MOTOR KANAN ---
+  if (RIGHT == 0) {
+    if (PWM_R >= 0) {
+      digitalWrite(pin_dir_motor_R, HIGH);   // arah maju
+    } else {
+      digitalWrite(pin_dir_motor_R, LOW);    // arah mundur
+      PWM_R = -PWM_R; // ubah jadi positif
+    }
+    analogWrite(pin_pwm_motor_R, constrain(PWM_R, 0, 255));
+  } 
+  else { // Jika polaritas dibalik
+    if (PWM_R >= 0) {
+      digitalWrite(pin_dir_motor_R, LOW);
+    } else {
+      digitalWrite(pin_dir_motor_R, HIGH);
+      PWM_R = -PWM_R;
+    }
+    analogWrite(pin_pwm_motor_R, constrain(PWM_R, 0, 255));
+  }
+
+  // --- MOTOR KIRI ---
+  if (LEFT == 0) {
+    if (PWM_L >= 0) {
+      digitalWrite(pin_dir_motor_L, HIGH);   // arah maju
+    } else {
+      digitalWrite(pin_dir_motor_L, LOW);    // arah mundur
+      PWM_L = -PWM_L;
+    }
+    analogWrite(pin_pwm_motor_L, constrain(PWM_L, 0, 255));
+  } 
+  else { // Jika polaritas dibalik
+    if (PWM_L >= 0) {
+      digitalWrite(pin_dir_motor_L, LOW);
+    } else {
+      digitalWrite(pin_dir_motor_L, HIGH);
+      PWM_L = -PWM_L;
+    }
+    analogWrite(pin_pwm_motor_L, constrain(PWM_L, 0, 255));
+  }
+}
+
+void setup() 
+{
+  // Inisialisasi pin
+  pinMode(pin_pwm_motor_L, OUTPUT);
+  pinMode(pin_dir_motor_L, OUTPUT);
+  pinMode(pin_pwm_motor_R, OUTPUT);
+  pinMode(pin_dir_motor_R, OUTPUT);
+
+  // Tes motor
+  setMotor(100, 100);   // maju pelan
   delay(2000);
-
-  kanan();
-  delay(1000);
-
-  kiri();
-  delay(1000);
-
-  berhenti();
+  setMotor(150, -30);   // belok kanan
   delay(2000);
+  setMotor(0, 0);       // stop
 }
 
-// ====== FUNGSI MOTOR ======
-
-void maju() {
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENA, speedMotor);
-  analogWrite(ENB, speedMotor);
-  Serial.println("F");
-}
-
-void kanan() {
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENA, speedMotor);
-  analogWrite(ENB, 0);
-  Serial.println("R");
-}
-
-void kiri() {
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENA, 0);
-  analogWrite(ENB, speedMotor);
-  Serial.println("L");
-}
-
-void berhenti() {
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENA, 0);
-  analogWrite(ENB, 0);
-  Serial.println("S");
+void loop() 
+{
+  // Kosong dulu
 }
